@@ -7,8 +7,13 @@ public class directoryImpl extends directoryPOA {
 
   readonly attribute long number_of_file;
 
+
   public void open_regular_file(regular_fileHolder r, String name, mode m) {
 
+    File f = new file(name);
+    if(f.exist()){
+      r.value;
+    }else throw no_such_file();
   }
 
   public void open_directory(directoryHolder f, String name) {
