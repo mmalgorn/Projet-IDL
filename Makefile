@@ -1,5 +1,5 @@
-MODULE = tpcorba/projet
-JAVA  = Client.java Serveur.java regular_fileImpl.java directoryImpl.java list_filesImpl.java
+MODULE = files
+JAVA  = regular_fileImpl.java directoryImpl.java file_listImpl.java Client.java Serveur.java
 IDL   = server.idl
 
 CLASS = $(JAVA:%.java=classes/$(MODULE)/%.class)

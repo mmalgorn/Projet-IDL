@@ -1,57 +1,85 @@
-package tpcorba.projet;
+package files;
 
 import org.omg.CORBA.*;
 import java.lang.*;
+import java.io.*;
+import org.omg.PortableServer.*;
 
 public class directoryImpl extends directoryPOA {
 
-  readonly attribute long number_of_file;
-  File dir;
+    protected POA poa_;
+    private int number_of_file;
+    File dir;
 
-  public directoryImpl (File f) {
-      dir = f;
-  }
+    public directoryImpl (File f, POA poa) {
+        dir = f;
+        poa_ = poa;
+    }
 
-  public void open_regular_file(regular_fileHolder r, String name, mode m) {
-      File f = new File(name);
-      if (!f.exists()) throw new no_such_file();
-      if (!f.isFile()) throw new invalid_type_file();
+    public int number_of_file() {
+        return number_of_file;
+    }
 
-      r.value = new regular_fileImpl(f);
-  }
+    public void open_regular_file(regular_fileHolder r, String name, mode m) throws no_such_file, invalid_type_file {
+        File f = new File(name);
+        if (!f.exists()) throw new no_such_file();
+        if (!f.isFile()) throw new invalid_type_file();
 
-  public void open_directory(directoryHolder f, String name) {
-      File f = new File(name);
-      if (!f.exists()) throw new no_such_file();
-      if (!f.isDirectory()) throw new invalid_type_file();
+        try {
+            org.omg.CORBA.Object alloc = poa_.servant_to_reference(new regular_fileImpl(f, m));
+            r.value = regular_fileHelper.narrow(alloc);
+        } catch(Exception e) {
+            System.out.println(e);
+        }
+    }
 
-      r.value = new directoryImpl(f);
-  }
+    public void open_directory(directoryHolder d, String name) throws no_such_file, invalid_type_file{
+        File f = new File(name);
+        if (!f.exists()) throw new no_such_file();
+        if (!f.isDirectory()) throw new invalid_type_file();
 
-  public void create_regular_file(regular_fileHolder r, String name) {
-      File f = new File(name);
-      if (f.exists()) throw new already_exists();
+        try {
+            org.omg.CORBA.Object alloc = poa_.servant_to_reference(new directoryImpl(f, poa_));
+            d.value = directoryHelper.narrow(alloc);
+        } catch(Exception e) {
+            System.out.println(e);
+        }
+    }
 
-      f.createNewFile();
-      r.value = new regular_fileImpl(f);
-  }
+    public void create_regular_file(regular_fileHolder r, String name) throws already_exist {
+        File f = new File(name);
+        if (f.exists()) throw new already_exist();
 
-  public void create_directory(directoryHolder f, String name) {
-      File f = new File(name);
-      if (f.exists()) throw new already_exists();
+        try {
+            f.createNewFile();
+            org.omg.CORBA.Object alloc = poa_.servant_to_reference(new regular_fileImpl(f, mode.read_write));
+            r.value = regular_fileHelper.narrow(alloc);
+        } catch(Exception e) {
+            System.out.println(e);
+        }
+    }
 
-      f.mkdir();
-      r.value = new directoryImpl(f);
-  }
+    public void create_directory(directoryHolder d, String name) throws already_exist{
+        File f = new File(name);
+        if (f.exists()) throw new already_exist();
 
-  public void delete_file(String name) {
-      File f = new File(name);
-      if (f.exists()) throw new no_such_file();
+        f.mkdir();
+        try {
+            org.omg.CORBA.Object alloc = poa_.servant_to_reference(new directoryImpl(f, poa_));
+            d.value = directoryHelper.narrow(alloc);
+        } catch(Exception e) {
+            System.out.println(e);
+        }
+    }
 
-      f.destroy();
-  }
+    public void delete_file(String name) throws no_such_file {
+        File f = new File(name);
+        if (f.exists()) throw new no_such_file();
 
-  public long list_files(file_listHolder l) {
-      
-  }
+        f.delete();
+    }
+
+    public int list_files(file_listHolder l) {
+        return 0;
+    }
 }
