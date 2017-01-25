@@ -6,6 +6,11 @@ import java.lang.*;
 public class directoryImpl extends directoryPOA {
 
   readonly attribute long number_of_file;
+  File dir;
+
+  public directoryImpl (File f) {
+      dir = f;
+  }
 
   public void open_regular_file(regular_fileHolder r, String name, mode m) {
 

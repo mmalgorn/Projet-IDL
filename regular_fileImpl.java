@@ -9,8 +9,8 @@ public class regular_fileImpl extends regular_filePOA {
   int offset;
   File file;
 
-  public regular_fileImpl (String pathname) {
-    file = new File(pathname);
+  public regular_fileImpl (File f) {
+    file = f;
   }
 
   public int read(int size, StringHolder data) {
@@ -30,11 +30,19 @@ public class regular_fileImpl extends regular_filePOA {
   public int write(int size, String data) {
     if (new_offset > file.length()) throw new end_of_file();
 
-    FileWriter frd = new FileWriter(file);
+    RandomAccessFile raf = new RandomAccessFile(file, "rw");
+    try {
+      raf.write(data.getBytes(), offset, size);
+    } catch(IOException e) {
+      throw new invalid_operation();
+    }
+    return size;
   }
 
   public void seek(int new_offset) {
     if (new_offset > file.length()) throw new end_of_file();
+
+    offset = new_offset;
   }
 
   public void close() {
