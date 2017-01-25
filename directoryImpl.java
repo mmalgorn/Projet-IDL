@@ -11,9 +11,8 @@ public class directoryImpl extends directoryPOA {
   public void open_regular_file(regular_fileHolder r, String name, mode m) {
 
     File f = new file(name);
-    if(f.exist()){
-      r.value;
-    }else throw no_such_file();
+    if(f.exist()) no_such_file();
+    r.value =f;
   }
 
   public void open_directory(directoryHolder f, String name) {
