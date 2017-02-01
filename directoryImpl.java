@@ -80,6 +80,16 @@ public class directoryImpl extends directoryPOA {
     }
 
     public int list_files(file_listHolder l) {
-        return 0;
+        String[] list = dir.list();
+        System.out.println(list);
+
+        try {
+            org.omg.CORBA.Object alloc = poa_.servant_to_reference(new file_listImpl(dir, list));
+            l.value = file_listHelper.narrow(alloc);
+        } catch(Exception e) {
+            System.out.println(e);
+        }
+
+        return list.length;
     }
 }

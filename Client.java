@@ -48,14 +48,22 @@ public class Client {
         try {
             regular_fileHolder refFile = new regular_fileHolder();
             directoryHolder refDir = new directoryHolder();
+            file_listHolder refFL = new file_listHolder();
             root.create_regular_file(refFile, "file");
             root.open_regular_file(refFile, "file", mode.read_only);
             root.create_directory(refDir, "dir");
             refDir.value.create_regular_file(refFile, "lolilol");
             String data = "Coucou";
             refFile.value.write(data.length(), data);
+            int size = refDir.value.list_files(refFL);
+            System.out.println(size);
+            directory_entryHolder deH = new directory_entryHolder();
+            deH.value = new directory_entry();
+            System.out.println(refFL.value.next_one(deH));              // CA MARCHE PO
+            System.out.println(deH.value.name);
         } catch(Exception e) {
-            System.out.println("lol:"+e);
+            System.out.println("lol:");
+            e.printStackTrace(System.out);
         }
 
     }
