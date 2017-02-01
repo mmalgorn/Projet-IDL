@@ -21,7 +21,7 @@ public class directoryImpl extends directoryPOA {
     }
 
     public void open_regular_file(regular_fileHolder r, String name, mode m) throws no_such_file, invalid_type_file {
-        File f = new File(name);
+        File f = new File(dir, name);
         if (!f.exists()) throw new no_such_file();
         if (!f.isFile()) throw new invalid_type_file();
 
@@ -34,7 +34,7 @@ public class directoryImpl extends directoryPOA {
     }
 
     public void open_directory(directoryHolder d, String name) throws no_such_file, invalid_type_file{
-        File f = new File(name);
+        File f = new File(dir, name);
         if (!f.exists()) throw new no_such_file();
         if (!f.isDirectory()) throw new invalid_type_file();
 
@@ -47,7 +47,7 @@ public class directoryImpl extends directoryPOA {
     }
 
     public void create_regular_file(regular_fileHolder r, String name) throws already_exist {
-        File f = new File(name);
+        File f = new File(dir, name);
         if (f.exists()) throw new already_exist();
 
         try {
@@ -60,7 +60,7 @@ public class directoryImpl extends directoryPOA {
     }
 
     public void create_directory(directoryHolder d, String name) throws already_exist{
-        File f = new File(name);
+        File f = new File(dir, name);
         if (f.exists()) throw new already_exist();
 
         f.mkdir();
@@ -73,7 +73,7 @@ public class directoryImpl extends directoryPOA {
     }
 
     public void delete_file(String name) throws no_such_file {
-        File f = new File(name);
+        File f = new File(dir, name);
         if (f.exists()) throw new no_such_file();
 
         f.delete();

@@ -65,7 +65,7 @@ public class regular_fileImpl extends regular_filePOA {
     }
 
     public void close() {
-
+        
     }
 
 }
