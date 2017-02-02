@@ -7,11 +7,11 @@ import java.util.*;
 
 public class Client {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] arguments) throws IOException {
 
-        ORB orb = ORB.init(args, null);
+        ORB orb = ORB.init(arguments, null);
 
-        if(args.length!=0) {
+        if(arguments.length!=0) {
             System.err.println("utilisation : pas de parametre ");
             System.exit(1);
         }
@@ -46,21 +46,99 @@ public class Client {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
         try {
-            regular_fileHolder refFile = new regular_fileHolder();
-            directoryHolder refDir = new directoryHolder();
-            file_listHolder refFL = new file_listHolder();
-            root.create_regular_file(refFile, "file");
-            root.open_regular_file(refFile, "file", mode.read_only);
-            root.create_directory(refDir, "dir");
-            refDir.value.create_regular_file(refFile, "lolilol");
-            String data = "Coucou";
-            refFile.value.write(data.length(), data);
-            int size = refDir.value.list_files(refFL);
-            System.out.println(size);
+            regular_fileHolder curFile = new regular_fileHolder();
+            directoryHolder curDir = new directoryHolder(root);
+            file_listHolder flH = new file_listHolder();
             directory_entryHolder deH = new directory_entryHolder();
             deH.value = new directory_entry();
-            System.out.println(refFL.value.next_one(deH));              // CA MARCHE PO
-            System.out.println(deH.value.name);
+            deH.value.type = file_type.regular_file_type;
+            Scanner scn = new Scanner(System.in);
+            String cmd;
+            String[] args;
+            String path = "";
+
+            // root.create_regular_file(refFile, "file");
+            // root.open_regular_file(refFile, "file", mode.read_only);
+            // root.create_directory(refDir, "dir");
+            // refDir.value.create_regular_file(refFile, "lolilol");
+            // String data = "Coucou";
+            // refFile.value.write(data.length(), data);
+            // int size = refDir.value.list_files(refFL);
+            // System.out.println(size);
+            // System.out.println(refFL.value.next_one(deH));              // CA MARCHE PO
+            // System.out.println(deH.value.name);
+
+            System.out.println("Welcome. Type \"help\" to display all of the available commands.");
+            while(true) {
+                System.out.print("\n" + (path.length() > 0 ? path + " " : "") + "> ");
+                cmd = scn.nextLine();
+                args = cmd.split("\\s+");
+                if(args.length == 0) continue;
+                switch(args[0]) {
+                    case "help":
+                        System.out.println("\tls : Display all the files and directories in the current directory.");
+                        System.out.println("\tcd <path> : Navigate to the given directory.");
+                        System.out.println("\ttouch <name> : Create a new file.");
+                        System.out.println("\tmkdir <name> : Create a new directory.");
+                        break;
+                    case "ls":
+                        int size = curDir.value.list_files(flH);
+                        System.out.println(size + " fichier" + (size > 1 ? "s" : ""));
+                        if(size == 0) break;
+                        while(flH.value.next_one(deH)) {
+                            System.out.print("\t" + deH.value.name);
+                            System.out.println(deH.value.type == file_type.directory_type ? "/" : "");
+                        }
+                        System.out.print("\t" + deH.value.name);
+                        System.out.println(deH.value.type == file_type.directory_type ? "/" : "");
+                        break;
+                    case "cd":
+                        if(args.length > 1) {
+                            String[] fullPath = args[1].split("/");
+                            for(int i=0; i<fullPath.length; i++) {
+                                try {
+                                    curDir.value.open_directory(curDir, fullPath[i]);
+                                    path += (path.length() > 0 ? "/" : "") + fullPath[i];
+                                } catch(no_such_file e) {
+                                    System.out.println(fullPath[i] + " not found");
+                                    break;
+                                } catch(invalid_type_file e) {
+                                    System.out.println(fullPath[i] + " is not a directory");
+                                    break;
+                                }
+                            }
+                        } else {
+                            curDir.value = root;
+                            path = "";
+                        }
+                        break;
+                    case "touch":
+                        if(args.length > 1) {
+                            try {
+                                curDir.value.create_regular_file(curFile, args[1]);
+                            } catch(already_exist e) {
+                                System.out.println(args[1] + " already exist");
+                                break;
+                            }
+                        } else {
+                            System.out.println("Missing name parameter");
+                        }
+                        break;
+                    case "mkdir":
+                        if(args.length > 1) {
+                            try {
+                                curDir.value.create_directory(curDir, args[1]);
+                                path += (path.length() > 0 ? "/" : "") + args[1];
+                            } catch(already_exist e) {
+                                System.out.println(args[1] + " already exist");
+                                break;
+                            }
+                        } else {
+                            System.out.println("Missing name parameter");
+                        }
+                        break;
+                }
+            }
         } catch(Exception e) {
             System.out.println("lol:");
             e.printStackTrace(System.out);

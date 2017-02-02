@@ -81,7 +81,6 @@ public class directoryImpl extends directoryPOA {
 
     public int list_files(file_listHolder l) {
         String[] list = dir.list();
-        System.out.println(list);
 
         try {
             org.omg.CORBA.Object alloc = poa_.servant_to_reference(new file_listImpl(dir, list));
