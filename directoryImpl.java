@@ -74,7 +74,7 @@ public class directoryImpl extends directoryPOA {
 
     public void delete_file(String name) throws no_such_file {
         File f = new File(dir, name);
-        if (f.exists()) throw new no_such_file();
+        if (!f.exists()) throw new no_such_file();
 
         f.delete();
     }
