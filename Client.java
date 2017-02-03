@@ -7,6 +7,8 @@ import java.util.*;
 
 public class Client {
 
+    enum Commands {help, ls, cd, touch, mkdir, rm};
+
     public static void main(String[] arguments) throws IOException {
 
         ORB orb = ORB.init(arguments, null);
@@ -74,14 +76,14 @@ public class Client {
                 cmd = scn.nextLine();
                 args = cmd.split("\\s+");
                 if(args.length == 0) continue;
-                switch(args[0]) {
-                    case "help":
+                switch(Commands.valueOf(args[0])) {
+                    case help:
                         System.out.println("\tls : Display all the files and directories in the current directory.");
                         System.out.println("\tcd <path> : Navigate to the given directory.");
                         System.out.println("\ttouch <name> : Create a new file.");
                         System.out.println("\tmkdir <name> : Create a new directory.");
                         break;
-                    case "ls":
+                    case ls:
                         int size = curDir.value.list_files(flH);
                         System.out.println(size + " fichier" + (size > 1 ? "s" : ""));
                         if(size == 0) break;
@@ -92,7 +94,7 @@ public class Client {
                         System.out.print("\t" + deH.value.name);
                         System.out.println(deH.value.type == file_type.directory_type ? "/" : "");
                         break;
-                    case "cd":
+                    case cd:
                         if(args.length > 1) {
                             String[] fullPath = args[1].split("/");
                             for(int i=0; i<fullPath.length; i++) {
@@ -112,7 +114,7 @@ public class Client {
                             path = "";
                         }
                         break;
-                    case "touch":
+                    case touch:
                         if(args.length > 1) {
                             try {
                                 curDir.value.create_regular_file(curFile, args[1]);
@@ -124,7 +126,7 @@ public class Client {
                             System.out.println("Missing name parameter");
                         }
                         break;
-                    case "mkdir":
+                    case mkdir:
                         if(args.length > 1) {
                             try {
                                 curDir.value.create_directory(curDir, args[1]);
@@ -137,6 +139,15 @@ public class Client {
                             System.out.println("Missing name parameter");
                         }
                         break;
+                    case rm:
+                        if(args.length > 1) {
+                            try {
+                                curDir.value.delete_file(args[1]);
+                            } catch(no_such_file e) {
+                                System.out.println(args[1] + " no such file or directory");
+                                break;
+                            }
+                        }
                 }
             }
         } catch(Exception e) {
