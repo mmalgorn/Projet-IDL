@@ -1,4 +1,4 @@
-MODULE = tpcorba/projet
+MODULE = files
 JAVA  = Client.java Serveur.java regular_fileImpl.java directoryImpl.java list_filesImpl.java
 IDL   = server.idl
 
