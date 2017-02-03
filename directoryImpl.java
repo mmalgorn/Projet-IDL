@@ -76,6 +76,15 @@ public class directoryImpl extends directoryPOA {
         File f = new File(dir, name);
         if (!f.exists()) throw new no_such_file();
 
+        recursiveDelete(f);
+    }
+
+    private void recursiveDelete(File f) {
+        if(f.isDirectory()) {
+            for(File subFile : f.listFiles()) {
+                recursiveDelete(subFile);
+            }
+        }
         f.delete();
     }
 

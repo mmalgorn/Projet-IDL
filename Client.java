@@ -7,7 +7,7 @@ import java.util.*;
 
 public class Client {
 
-    enum Commands {help, ls, cd, touch, mkdir, rm};
+    enum Command {help, ls, cd, touch, mkdir, rm, cat, quit};
 
     public static void main(String[] arguments) throws IOException {
 
@@ -55,7 +55,7 @@ public class Client {
             deH.value = new directory_entry();
             deH.value.type = file_type.regular_file_type;
             Scanner scn = new Scanner(System.in);
-            String cmd;
+            Command cmd;
             String[] args;
             String path = "";
 
@@ -73,15 +73,23 @@ public class Client {
             System.out.println("Welcome. Type \"help\" to display all of the available commands.");
             while(true) {
                 System.out.print("\n" + (path.length() > 0 ? path + " " : "") + "> ");
-                cmd = scn.nextLine();
-                args = cmd.split("\\s+");
+                args = scn.nextLine().split("\\s+");
                 if(args.length == 0) continue;
-                switch(Commands.valueOf(args[0])) {
+                try {
+                    cmd = Command.valueOf(args[0]);
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Invalid command");
+                    continue;
+                }
+                switch(cmd) {
                     case help:
                         System.out.println("\tls : Display all the files and directories in the current directory.");
                         System.out.println("\tcd <path> : Navigate to the given directory.");
                         System.out.println("\ttouch <name> : Create a new file.");
                         System.out.println("\tmkdir <name> : Create a new directory.");
+                        System.out.println("\trm <name> : Delete the given file or directory.");
+                        System.out.println("\tcat <name> [size] : Display the content of the file.");
+                        System.out.println("\tquit : Close the client.");
                         break;
                     case ls:
                         int size = curDir.value.list_files(flH);
@@ -145,13 +153,53 @@ public class Client {
                                 curDir.value.delete_file(args[1]);
                             } catch(no_such_file e) {
                                 System.out.println(args[1] + " no such file or directory");
+                            }
+                        } else {
+                            System.out.println("Missing name parameter");
+                        }
+                        break;
+                    case cat:
+                        StringHolder sH = new StringHolder();
+                        sH.value = "";
+                        if(args.length == 2) {
+                            try {
+                                curDir.value.open_regular_file(curFile, args[1], mode.read_only);
+                                curFile.value.read(-1, sH);
+                                System.out.println(sH.value);
+                            } catch(no_such_file e) {
+                                System.out.println(args[1] + " no such file");
                                 break;
                             }
+                        } else if(args.length > 2) {
+                            try {
+                                int s = new Integer(args[2]);
+                                curDir.value.open_regular_file(curFile, args[1], mode.read_only);
+                                while(curFile.value.read(s, sH) != 1) {
+                                    System.out.print(sH.value);
+                                    scn.nextLine();
+                                    System.out.print("\b");
+                                }
+                            } catch(no_such_file e) {
+                                System.out.println(args[1] + " no such file");
+                            } catch(NumberFormatException e) {
+                                System.out.println("Parameter 2 is invalid");
+                            } catch(end_of_file e) {
+                                System.out.println("End of file");
+                            }
+                        } else {
+                            System.out.println("Missing name parameter");
                         }
+                        break;
+                    case quit:
+                        System.exit(0);
+                        break;
+                    default:
+                        System.out.println("Invalid command");
+                        break;
                 }
             }
         } catch(Exception e) {
-            System.out.println("lol:");
+            System.out.println("Erreur :");
             e.printStackTrace(System.out);
         }
 

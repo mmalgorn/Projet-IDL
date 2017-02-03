@@ -32,6 +32,7 @@ public class regular_fileImpl extends regular_filePOA {
         if (size > file.length()) throw new end_of_file();
         if (m == mode.write_append || m == mode.write_trunc) throw new invalid_operation();
 
+        if(size == -1) size = new Long(file.length()).intValue();
         byte[] buf = new byte[size];
         int nbr = -1;
         try {
@@ -42,6 +43,8 @@ public class regular_fileImpl extends regular_filePOA {
         } catch(IOException e) {
             System.out.println(e);
         }
+
+        if(nbr != -1) offset += size;
         return nbr;
     }
 
@@ -65,7 +68,7 @@ public class regular_fileImpl extends regular_filePOA {
     }
 
     public void close() {
-        
+
     }
 
 }
