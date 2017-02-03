@@ -2,3 +2,5 @@ generated/
 classes/
 **/*~
 **/#*#
+**/*.jacorb
+root/
