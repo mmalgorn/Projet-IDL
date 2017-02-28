@@ -7,7 +7,7 @@ import java.util.*;
 
 public class Client {
 
-    enum Command {help, ls, cd, touch, mkdir, rm, cat, quit};
+    enum Command {help, ls, cd, touch, mkdir, rm, read, quit};
 
     public static void main(String[] arguments) throws IOException {
 
@@ -88,7 +88,7 @@ public class Client {
                         System.out.println("\ttouch <name> : Create a new file.");
                         System.out.println("\tmkdir <name> : Create a new directory.");
                         System.out.println("\trm <name> : Delete the given file or directory.");
-                        System.out.println("\tcat <name> [size] : Display the content of the file.");
+                        System.out.println("\tread <name> [size] [offset] : Display the content of the file.");
                         System.out.println("\tquit : Close the client.");
                         break;
                     case ls:
@@ -158,7 +158,7 @@ public class Client {
                             System.out.println("Missing name parameter");
                         }
                         break;
-                    case cat:
+                    case read:
                         StringHolder sH = new StringHolder();
                         sH.value = "";
                         if(args.length == 2) {
@@ -170,7 +170,7 @@ public class Client {
                                 System.out.println(args[1] + " no such file");
                                 break;
                             }
-                        } else if(args.length > 2) {
+                        } else if(args.length == 3) {
                             try {
                                 int s = new Integer(args[2]);
                                 curDir.value.open_regular_file(curFile, args[1], mode.read_only);
@@ -185,6 +185,24 @@ public class Client {
                                 System.out.println("Parameter 2 is invalid");
                             } catch(end_of_file e) {
                                 System.out.println("End of file");
+                            }
+                        } else if(args.length > 3) {
+                            try {
+                                int s = new Integer(args[2]);
+                                int o = new Integer(args[3]);
+                                curDir.value.open_regular_file(curFile, args[1], mode.read_only);
+                                curFile.value.seek(o);
+                                curFile.value.read(s, sH);
+                                System.out.print(sH.value);
+                                curFile.value.close();
+                            } catch(no_such_file e) {
+                                System.out.println(args[1] + " no such file");
+                            } catch(NumberFormatException e) {
+                                System.out.println("Parameter 2 or 3 is invalid");
+                            } catch(end_of_file e) {
+                                System.out.println("End of file");
+                            } catch(invalid_offset e) {
+                                System.out.println("Invalid offset");
                             }
                         } else {
                             System.out.println("Missing name parameter");

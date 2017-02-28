@@ -26,7 +26,7 @@ public class directoryImpl extends directoryPOA {
         if (!f.isFile()) throw new invalid_type_file();
 
         try {
-            org.omg.CORBA.Object alloc = poa_.servant_to_reference(new regular_fileImpl(f, m));
+            org.omg.CORBA.Object alloc = poa_.servant_to_reference(new regular_fileImpl(f, m, poa_));
             r.value = regular_fileHelper.narrow(alloc);
         } catch(Exception e) {
             System.out.println(e);
@@ -52,7 +52,7 @@ public class directoryImpl extends directoryPOA {
 
         try {
             f.createNewFile();
-            org.omg.CORBA.Object alloc = poa_.servant_to_reference(new regular_fileImpl(f, mode.read_write));
+            org.omg.CORBA.Object alloc = poa_.servant_to_reference(new regular_fileImpl(f, mode.read_write, poa_));
             r.value = regular_fileHelper.narrow(alloc);
         } catch(Exception e) {
             System.out.println(e);
