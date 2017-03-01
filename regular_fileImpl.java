@@ -44,6 +44,12 @@ public class regular_fileImpl extends regular_filePOA {
 		}
 	}
 
+	/*
+	 * Lit size caractères dans le fichier et les affecte dans le holder
+	 * Renvoie le nombre de caractères réellement lus
+	 * Renvoie une exception End_of_file si le nombre de caractères lus dépasse la taille restante du fichier
+	 * Renvoie une exception Invalid_operation si le mode ne permet pas la lecture
+	 */
 	public int read(int size, StringHolder data) throws end_of_file, invalid_operation {
 		if (size > fileSize - offset)
 			throw new end_of_file();
@@ -66,6 +72,11 @@ public class regular_fileImpl extends regular_filePOA {
 		return nbr;
 	}
 
+	/*
+	 * Ecrit size caractères dans le fichier en fonction du mode d'écriture
+	 * Renvoie le nombre de caractères réellement écrits
+	 * Renvoie une exception Invalid_operation si le mode ne permet pas l'écriture
+	 */
 	public int write(int size, String data) throws invalid_operation {
 		if (m == mode.read_only)
 			throw new invalid_operation();
@@ -78,6 +89,11 @@ public class regular_fileImpl extends regular_filePOA {
 		return size;
 	}
 
+	/*
+	 * Modifie l'offset du fichier
+	 * Renvoie une exception Invalid_offset si l'offset est supérieur à la taille ou inférieur à zéro
+	 * Renvoie une exception Invalid_operation si le mode ne permet pas de modifier l'offset
+	 */
 	public void seek(int new_offset) throws invalid_offset, invalid_operation {
 		if (new_offset > file.length())
 			throw new invalid_offset();
@@ -92,6 +108,9 @@ public class regular_fileImpl extends regular_filePOA {
 		}
 	}
 
+	/*
+	 * Ferme le RandomAccessFile et desactive l'objet corba
+	 */
 	public void close() {
 		try {
 			raf.close();
