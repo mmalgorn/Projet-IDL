@@ -17,6 +17,10 @@ public class file_listImpl extends file_listPOA {
 		index = 0;
 	}
 
+	/*
+	 * Affecte l'entrée du répertoire au holder
+	 * Renvoie vrai si il reste des entrées dans liste ou faux sinon
+	 */
 	public boolean next_one(directory_entryHolder e) {
 		if (list.length == 0)
 			return false;
