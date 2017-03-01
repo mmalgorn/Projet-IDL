@@ -80,11 +80,9 @@ public class directoryImpl extends directoryPOA {
     }
 
     private void recursiveDelete(File f) {
-        if(f.isDirectory()) {
-            for(File subFile : f.listFiles()) {
+        if(f.isDirectory())
+            for(File subFile : f.listFiles())
                 recursiveDelete(subFile);
-            }
-        }
         f.delete();
     }
 

@@ -7,26 +7,28 @@ import org.omg.PortableServer.*;
 
 public class regular_fileImpl extends regular_filePOA {
 
-    int offset;
+    int offset, fileSize;
     File file;
     mode m;
     POA poa_;
     RandomAccessFile raf;
-
 
     public regular_fileImpl (File f, mode m, POA poa) {
         poa_ = poa;
         file = f;
         this.m = m;
         offset = 0;
+        fileSize = new Long(file.length()).intValue();
         try {
             switch(m.value()) {
+                case mode._read_write:
+                    raf = new RandomAccessFile(f, "rw");
                 case mode._read_only:
                     raf = new RandomAccessFile(f, "r");
                     break;
                 case mode._write_append:
                     raf = new RandomAccessFile(f, "rw");
-                    offset = new Long(file.length()).intValue();        // EXTREMEMENT SALE
+                    offset = fileSize;
                     break;
                 case mode._write_trunc:
                     raf = new RandomAccessFile(f, "rw");
@@ -43,10 +45,9 @@ public class regular_fileImpl extends regular_filePOA {
     }
 
     public int read(int size, StringHolder data) throws end_of_file, invalid_operation {
-        if (size > file.length()-offset) throw new end_of_file();
+        if (size > fileSize-offset) throw new end_of_file();
         if (m == mode.write_append || m == mode.write_trunc) throw new invalid_operation();
 
-        int fileSize = new Long(file.length()).intValue();
         if(size == -1) size = fileSize;
         byte[] buf = new byte[fileSize];
         int nbr = -1;
@@ -77,9 +78,8 @@ public class regular_fileImpl extends regular_filePOA {
         if (m == mode.write_append || m == mode.write_trunc) throw new invalid_operation();
 
         offset = new_offset;
-        int fileSize = new Long(file.length()).intValue();
         try {
-            raf.read(new byte[fileSize], 0, offset);
+            raf.seek(new_offset);
         } catch(IOException e) {
             System.out.println(e);
         }
@@ -91,7 +91,8 @@ public class regular_fileImpl extends regular_filePOA {
             byte [] ObjID = poa_.reference_to_id(poa_.servant_to_reference(this));
             poa_.deactivate_object(ObjID);
         } catch (Exception e) {
-            System.out.println("POA Exception " + e);
+            System.out.println("POA Exception");
+            e.printStackTrace(System.out);
         }
     }
 

@@ -59,17 +59,6 @@ public class Client {
             String[] args;
             String path = "";
 
-            // root.create_regular_file(refFile, "file");
-            // root.open_regular_file(refFile, "file", mode.read_only);
-            // root.create_directory(refDir, "dir");
-            // refDir.value.create_regular_file(refFile, "lolilol");
-            // String data = "Coucou";
-            // refFile.value.write(data.length(), data);
-            // int size = refDir.value.list_files(refFL);
-            // System.out.println(size);
-            // System.out.println(refFL.value.next_one(deH));              // CA MARCHE PO
-            // System.out.println(deH.value.name);
-
             System.out.println("Welcome. Type \"help\" to display all of the available commands.");
             while(true) {
                 System.out.print("\n" + (path.length() > 0 ? path + " " : "") + "> ");
@@ -111,10 +100,8 @@ public class Client {
                                     path += (path.length() > 0 ? "/" : "") + fullPath[i];
                                 } catch(no_such_file e) {
                                     System.out.println(fullPath[i] + " not found");
-                                    break;
                                 } catch(invalid_type_file e) {
                                     System.out.println(fullPath[i] + " is not a directory");
-                                    break;
                                 }
                             }
                         } else {
@@ -126,6 +113,7 @@ public class Client {
                         if(args.length > 1) {
                             try {
                                 curDir.value.create_regular_file(curFile, args[1]);
+                                curFile.value.close();
                             } catch(already_exist e) {
                                 System.out.println(args[1] + " already exist");
                                 break;
@@ -166,6 +154,7 @@ public class Client {
                                 curDir.value.open_regular_file(curFile, args[1], mode.read_only);
                                 curFile.value.read(-1, sH);
                                 System.out.println(sH.value);
+                                curFile.value.close();
                             } catch(no_such_file e) {
                                 System.out.println(args[1] + " no such file");
                                 break;
@@ -220,6 +209,5 @@ public class Client {
             System.out.println("Erreur :");
             e.printStackTrace(System.out);
         }
-
     }
 }

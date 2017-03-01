@@ -21,6 +21,7 @@ public class Serveur {
             try {
                 String calc_ref = orb.object_to_string(alloc);
                 String refFile = "fs.ref";
+                new File(".", "root").mkdir();
                 PrintWriter out = new PrintWriter(new FileOutputStream(refFile));
                 out.println(calc_ref);
                 out.close();
