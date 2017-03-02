@@ -7,9 +7,9 @@ import org.omg.PortableServer.*;
 
 public class file_listImpl extends file_listPOA {
 
-	String[] list;
-	int index;
-	File dir;
+	String[]	list;
+	int			index;
+	File		dir;
 
 	public file_listImpl(File dir, String[] list) {
 		this.list = list;
@@ -18,12 +18,11 @@ public class file_listImpl extends file_listPOA {
 	}
 
 	/*
-	 * Affecte l'entrée du répertoire au holder
-	 * Renvoie vrai si il reste des entrées dans liste ou faux sinon
+	 * Affecte l'entrÃ©e du rÃ©pertoire au holder Renvoie vrai si il reste des
+	 * entrÃ©es dans liste ou faux sinon
 	 */
 	public boolean next_one(directory_entryHolder e) {
-		if (list.length == 0)
-			return false;
+		if (list.length == 0) return false;
 
 		File f = new File(dir, list[index++]);
 		e.value.name = f.getName();

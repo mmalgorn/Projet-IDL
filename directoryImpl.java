@@ -7,9 +7,9 @@ import org.omg.PortableServer.*;
 
 public class directoryImpl extends directoryPOA {
 
-	protected POA poa_;
-	private int number_of_file;
-	File dir;
+	protected POA	poa_;
+	private int		number_of_file;
+	File			dir;
 
 	public directoryImpl(File f, POA poa) {
 		dir = f;
@@ -17,24 +17,22 @@ public class directoryImpl extends directoryPOA {
 	}
 
 	/*
-	 * Renvoie le nombre de fichiers et sous-répertoires présents dans le répertoire courant
+	 * Renvoie le nombre de fichiers et sous-rÃ©pertoires prÃ©sents dans le rÃ©pertoire courant
 	 */
 	public int number_of_file() {
 		return number_of_file;
 	}
 
 	/*
-	 * Affecte au holder le fichier régulier correspondant au nom passé en argument et ouvert dans le mode
-	 * d'écriture spécifié
+	 * Affecte au holder le fichier rÃ©gulier correspondant au nom passÃ© en argument et ouvert dans le mode d'Ã©criture
+	 * spÃ©cifiÃ©
 	 * Renvoie une exception No_such_file si aucun fichier ne correspond au nom
-	 * Renvoie une exception Invalid_type_file si le fichier correspondant à name est un répertoire
+	 * Renvoie une exception Invalid_type_file si le fichier correspondant Ã  name est un rÃ©pertoire
 	 */
 	public void open_regular_file(regular_fileHolder r, String name, mode m) throws no_such_file, invalid_type_file {
 		File f = new File(dir, name);
-		if (!f.exists())
-			throw new no_such_file();
-		if (!f.isFile())
-			throw new invalid_type_file();
+		if (!f.exists()) throw new no_such_file();
+		if (!f.isFile()) throw new invalid_type_file();
 
 		try {
 			org.omg.CORBA.Object alloc = poa_.servant_to_reference(new regular_fileImpl(f, m, poa_));
@@ -45,16 +43,14 @@ public class directoryImpl extends directoryPOA {
 	}
 
 	/*
-	 * Affecte au holder le répertoire correspondant au nom passé en argument
+	 * Affecte au holder le rÃ©pertoire correspondant au nom passÃ© en argument
 	 * Renvoie une exception No_such_file si aucun fichier ne correspond au nom
-	 * Renvoie une exception Invalid_type_file si le fichier correspondant à name n'est pas un répertoire
+	 * Renvoie une exception Invalid_type_file si le fichier correspondant Ã  name n'est pas un rÃ©pertoire
 	 */
 	public void open_directory(directoryHolder d, String name) throws no_such_file, invalid_type_file {
 		File f = new File(dir, name);
-		if (!f.exists())
-			throw new no_such_file();
-		if (!f.isDirectory())
-			throw new invalid_type_file();
+		if (!f.exists()) throw new no_such_file();
+		if (!f.isDirectory()) throw new invalid_type_file();
 
 		try {
 			org.omg.CORBA.Object alloc = poa_.servant_to_reference(new directoryImpl(f, poa_));
@@ -65,13 +61,12 @@ public class directoryImpl extends directoryPOA {
 	}
 
 	/*
-	 * Créer un nouveau fichier physiquement ainsi qu'une nouvelle instance de fichier régulier et l'affecte au holder
-	 * Renvoie une exception Already_exist si un fichier ou repertoire du même nom existe déjà
+	 * CrÃ©e un nouveau fichier physiquement ainsi qu'une nouvelle instance de fichier rÃ©gulier et l'affecte au holder
+	 * Renvoie une exception Already_exist si un fichier ou repertoire du mÃªme nom existe dÃ©jÃ 
 	 */
 	public void create_regular_file(regular_fileHolder r, String name) throws already_exist {
 		File f = new File(dir, name);
-		if (f.exists())
-			throw new already_exist();
+		if (f.exists()) throw new already_exist();
 
 		try {
 			f.createNewFile();
@@ -84,13 +79,12 @@ public class directoryImpl extends directoryPOA {
 	}
 
 	/*
-	 * Créer un nouveau répertoire physiquement ainsi qu'une une nouvelle instance de répertoire et l'affecte au holder
-	 * Renvoie une exception Already_exist si un fichier ou repertoire du même nom existe déjà
+	 * CrÃ©e un nouveau rÃ©pertoire physiquement ainsi qu'une une nouvelle instance de rÃ©pertoire et l'affecte au holder
+	 * Renvoie une exception Already_exist si un fichier ou repertoire du mÃªme nom existe dÃ©jÃ 
 	 */
 	public void create_directory(directoryHolder d, String name) throws already_exist {
 		File f = new File(dir, name);
-		if (f.exists())
-			throw new already_exist();
+		if (f.exists()) throw new already_exist();
 
 		f.mkdir();
 		try {
@@ -103,31 +97,29 @@ public class directoryImpl extends directoryPOA {
 	}
 
 	/*
-	 * Supprime le fichier ou le répertoire correspondant au nom passé en argument
-	 * si le fichier est non-vide ses fichiers et sous-répertoires sont supprimés
-	 * Renvoie une exception No_such_file si aucun fichier ne correspond au nom donné
+	 * Supprime le fichier ou le rÃ©pertoire correspondant au nom passÃ© en argument si le fichier est non-vide ses
+	 * fichiers et sous-rÃ©pertoires sont supprimÃ©s
+	 * Renvoie une exception No_such_file si aucun fichier ne correspond au nom donnÃ©
 	 */
 	public void delete_file(String name) throws no_such_file {
 		File f = new File(dir, name);
-		if (!f.exists())
-			throw new no_such_file();
+		if (!f.exists()) throw new no_such_file();
 
 		recursiveDelete(f);
 		number_of_file = dir.listFiles().length;
 	}
 
 	/*
-	 * Fonction récursive permettant de supprimer le contenu d'un répertoire
+	 * Fonction rÃ©cursive permettant de supprimer le contenu d'un rÃ©pertoire
 	 */
 	private void recursiveDelete(File f) {
-		if (f.isDirectory())
-			for (File subFile : f.listFiles())
-				recursiveDelete(subFile);
+		if (f.isDirectory()) for (File subFile : f.listFiles())
+			recursiveDelete(subFile);
 		f.delete();
 	}
 
 	/*
-	 * Affecte au holder l'instance de liste de fichiers correspondant au répertoire courant
+	 * Affecte au holder l'instance de liste de fichiers correspondant au rÃ©pertoire courant
 	 */
 	public int list_files(file_listHolder l) {
 		String[] list = dir.list();
