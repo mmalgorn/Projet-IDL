@@ -12,6 +12,10 @@ public class Client {
     help, ls, cd, touch, mkdir, rm, read, quit, vi
   };
 
+  enum Param {
+    wa, wh
+  };
+
   public static void main(String[] arguments) throws IOException {
 
     ORB orb = ORB.init(arguments, null);
@@ -173,6 +177,7 @@ public class Client {
                 scn.nextLine();
                 System.out.print("\b");
               }
+              curFile.value.close();
             } catch (no_such_file e) {
               System.out.println(args[1] + " no such file");
             } catch (NumberFormatException e) {
@@ -205,32 +210,44 @@ public class Client {
           case vi:
           if(args.length > 1){
             try{
-              /*switch(args[1]){
-              case "-wa" :
-              if(args.length < 2) System.out.println("Missing name parameter");
-              curDir.value.open_regular_file(curFile,args[2],mode._write_append);
-              break;
+              mode m = mode.read_write;
+              String filename="";
+              boolean erreur = false;
+              if(args.length >= 3){
+                if(args[1].equals("-wa")){
+                  m=mode.write_append;
+                  System.out.println("-Wa");
+                }else{
+                  if(args[1].equals("-wh")){
+                      m=mode.write_trunc;
+                  }else{
+                    erreur = true;
+                    System.out.println("Invalid parrameter");
 
-              case "-wh" :
-              if(args.length < 2) System.out.println("Missing name parameter");
-              curDir.value.open_regular_file(curFile,args[2],mode._write_trunc);
-              break;
+                  }
+                }
+                  filename = args[2];
 
-              default :*/
-              curDir.value.open_regular_file(curFile,args[1],mode.read_write);
-              /*  break;
-            }*/
+
+              }else{
+                filename = args[1];
+              }
+
+            if(!erreur){
+            curDir.value.open_regular_file(curFile,filename,m);
+
             System.out.println("Type the text do you want and escape by taping quit");
             Scanner sc = new Scanner(System.in);
-            String saisie=null;
+            String saisie="";
             String buffer="";
             while (!buffer.equals("quit")){
-              saisie=saisie+"\n"+buffer;
+              saisie=saisie+buffer+"\n";
               buffer = sc.nextLine();
             }
             System.out.println(saisie);
             curFile.value.write(saisie.length(), saisie);
             curFile.value.close();
+          }
           }catch (no_such_file e) {
             System.out.println(args[1] + " no such file");
           } catch (NumberFormatException e) {

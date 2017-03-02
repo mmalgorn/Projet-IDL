@@ -23,12 +23,14 @@ public class regular_fileImpl extends regular_filePOA {
 			switch (m.value()) {
 			case mode._read_write:
 				raf = new RandomAccessFile(f, "rw");
+				break;
 			case mode._read_only:
 				raf = new RandomAccessFile(f, "r");
 				break;
 			case mode._write_append:
 				raf = new RandomAccessFile(f, "rw");
 				offset = fileSize;
+				raf.seek(fileSize);
 				break;
 			case mode._write_trunc:
 				raf = new RandomAccessFile(f, "rw");
@@ -82,7 +84,12 @@ public class regular_fileImpl extends regular_filePOA {
 			throw new invalid_operation();
 
 		try {
-			raf.write(data.getBytes(), offset, size);
+			if(m==mode.write_append){
+				raf.write(data.getBytes(),offset,size+fileSize);
+			}
+			else{
+				raf.write(data.getBytes(), offset, size);
+			}
 		} catch (IOException e) {
 			System.out.println(e);
 			e.printStackTrace();
