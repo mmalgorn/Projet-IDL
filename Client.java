@@ -7,14 +7,16 @@ import java.util.*;
 
 public class Client {
 
-  enum Commands {help, ls, cd, touch, mkdir, rm};
-  enum Param {-rw,-wa,-wt};
+
+  enum Command {
+    help, ls, cd, touch, mkdir, rm, read, quit, vi
+  };
 
   public static void main(String[] arguments) throws IOException {
 
     ORB orb = ORB.init(arguments, null);
 
-    if(arguments.length!=0) {
+    if (arguments.length != 0) {
       System.err.println("utilisation : pas de parametre ");
       System.exit(1);
     }
@@ -56,40 +58,38 @@ public class Client {
       deH.value = new directory_entry();
       deH.value.type = file_type.regular_file_type;
       Scanner scn = new Scanner(System.in);
-      String cmd;
+      Command cmd;
       String[] args;
       String path = "";
 
-      // root.create_regular_file(refFile, "file");
-      // root.open_regular_file(refFile, "file", mode.read_only);
-      // root.create_directory(refDir, "dir");
-      // refDir.value.create_regular_file(refFile, "lolilol");
-      // String data = "Coucou";
-      // refFile.value.write(data.length(), data);
-      // int size = refDir.value.list_files(refFL);
-      // System.out.println(size);
-      // System.out.println(refFL.value.next_one(deH));              // CA MARCHE PO
-      // System.out.println(deH.value.name);
-
       System.out.println("Welcome. Type \"help\" to display all of the available commands.");
-      while(true) {
+      while (true) {
         System.out.print("\n" + (path.length() > 0 ? path + " " : "") + "> ");
-        cmd = scn.nextLine();
-        args = cmd.split("\\s+");
-        if(args.length == 0) continue;
-        switch(Commands.valueOf(args[0])) {
+        args = scn.nextLine().split("\\s+");
+        if (args.length == 0)
+        continue;
+        try {
+          cmd = Command.valueOf(args[0]);
+        } catch (IllegalArgumentException e) {
+          System.out.println("Invalid command");
+          continue;
+        }
+        switch (cmd) {
           case help:
           System.out.println("\tls : Display all the files and directories in the current directory.");
           System.out.println("\tcd <path> : Navigate to the given directory.");
           System.out.println("\ttouch <name> : Create a new file.");
           System.out.println("\tmkdir <name> : Create a new directory.");
-          System.out.println("\tvi <option> <name> : launch file editor");
+          System.out.println("\trm <name> : Delete the given file or directory.");
+          System.out.println("\tread <name> [size] [offset] : Display the content of the file.");
+          System.out.println("\tquit : Close the client.");
           break;
           case ls:
           int size = curDir.value.list_files(flH);
           System.out.println(size + " fichier" + (size > 1 ? "s" : ""));
-          if(size == 0) break;
-          while(flH.value.next_one(deH)) {
+          if (size == 0)
+          break;
+          while (flH.value.next_one(deH)) {
             System.out.print("\t" + deH.value.name);
             System.out.println(deH.value.type == file_type.directory_type ? "/" : "");
           }
@@ -97,18 +97,16 @@ public class Client {
           System.out.println(deH.value.type == file_type.directory_type ? "/" : "");
           break;
           case cd:
-          if(args.length > 1) {
+          if (args.length > 1) {
             String[] fullPath = args[1].split("/");
-            for(int i=0; i<fullPath.length; i++) {
+            for (int i = 0; i < fullPath.length; i++) {
               try {
                 curDir.value.open_directory(curDir, fullPath[i]);
                 path += (path.length() > 0 ? "/" : "") + fullPath[i];
-              } catch(no_such_file e) {
+              } catch (no_such_file e) {
                 System.out.println(fullPath[i] + " not found");
-                break;
-              } catch(invalid_type_file e) {
+              } catch (invalid_type_file e) {
                 System.out.println(fullPath[i] + " is not a directory");
-                break;
               }
             }
           } else {
@@ -117,10 +115,11 @@ public class Client {
           }
           break;
           case touch:
-          if(args.length > 1) {
+          if (args.length > 1) {
             try {
               curDir.value.create_regular_file(curFile, args[1]);
-            } catch(already_exist e) {
+              curFile.value.close();
+            } catch (already_exist e) {
               System.out.println(args[1] + " already exist");
               break;
             }
@@ -129,11 +128,11 @@ public class Client {
           }
           break;
           case mkdir:
-          if(args.length > 1) {
+          if (args.length > 1) {
             try {
               curDir.value.create_directory(curDir, args[1]);
               path += (path.length() > 0 ? "/" : "") + args[1];
-            } catch(already_exist e) {
+            } catch (already_exist e) {
               System.out.println(args[1] + " already exist");
               break;
             }
@@ -142,47 +141,115 @@ public class Client {
           }
           break;
           case rm:
-          if(args.length > 1) {
+          if (args.length > 1) {
             try {
               curDir.value.delete_file(args[1]);
-            } catch(no_such_file e) {
+            } catch (no_such_file e) {
               System.out.println(args[1] + " no such file or directory");
+            }
+          } else {
+            System.out.println("Missing name parameter");
+          }
+          break;
+          case read:
+          StringHolder sH = new StringHolder();
+          sH.value = "";
+          if (args.length == 2) {
+            try {
+              curDir.value.open_regular_file(curFile, args[1], mode.read_only);
+              curFile.value.read(-1, sH);
+              System.out.println(sH.value);
+              curFile.value.close();
+            } catch (no_such_file e) {
+              System.out.println(args[1] + " no such file");
               break;
             }
+          } else if (args.length == 3) {
+            try {
+              int s = new Integer(args[2]);
+              curDir.value.open_regular_file(curFile, args[1], mode.read_only);
+              while (curFile.value.read(s, sH) != 1) {
+                System.out.print(sH.value);
+                scn.nextLine();
+                System.out.print("\b");
+              }
+            } catch (no_such_file e) {
+              System.out.println(args[1] + " no such file");
+            } catch (NumberFormatException e) {
+              System.out.println("Parameter 2 is invalid");
+            } catch (end_of_file e) {
+              System.out.println("End of file");
+            }
+          } else if (args.length > 3) {
+            try {
+              int s = new Integer(args[2]);
+              int o = new Integer(args[3]);
+              curDir.value.open_regular_file(curFile, args[1], mode.read_only);
+              curFile.value.seek(o);
+              curFile.value.read(s, sH);
+              System.out.print(sH.value);
+              curFile.value.close();
+            } catch (no_such_file e) {
+              System.out.println(args[1] + " no such file");
+            } catch (NumberFormatException e) {
+              System.out.println("Parameter 2 or 3 is invalid");
+            } catch (end_of_file e) {
+              System.out.println("End of file");
+            } catch (invalid_offset e) {
+              System.out.println("Invalid offset");
+            }
+          } else {
+            System.out.println("Missing name parameter");
           }
           break;
           case vi:
           if(args.length > 1){
             try{
-              switch(Param.valueOf(args[1])){
-                case -wa :
-                if(args.length < 2) System.out.println("Missing name parameter");
-                curDir.value.open_regular_file(curFile,args[2],mode._write_append;
-                break;
+              /*switch(args[1]){
+              case "-wa" :
+              if(args.length < 2) System.out.println("Missing name parameter");
+              curDir.value.open_regular_file(curFile,args[2],mode._write_append);
+              break;
 
-                case -wh :
-                if(args.length < 2) System.out.println("Missing name parameter");
-                curDir.value.open_regular_file(curFile,args[2],mode._write_trunc);
-                break;
+              case "-wh" :
+              if(args.length < 2) System.out.println("Missing name parameter");
+              curDir.value.open_regular_file(curFile,args[2],mode._write_trunc);
+              break;
 
-                default :
-                curDir.value.open_regular_file(curFile,args[1]),mode.read_write);
-                break;
-              }
-              System.out.println()
-            }catch(Execption e){
-
+              default :*/
+              curDir.value.open_regular_file(curFile,args[1],mode.read_write);
+              /*  break;
+            }*/
+            System.out.println("Type the text do you want and escape by taping quit");
+            Scanner sc = new Scanner(System.in);
+            String saisie=null;
+            String buffer="";
+            while (!buffer.equals("quit")){
+              saisie=saisie+"\n"+buffer;
+              buffer = sc.nextLine();
             }
-
+            System.out.println(saisie);
+            curFile.value.write(saisie.length(), saisie);
+            curFile.value.close();
+          }catch (no_such_file e) {
+            System.out.println(args[1] + " no such file");
+          } catch (NumberFormatException e) {
+            System.out.println("Parameter 2 or 3 is invalid");
 
           }
         }
+        break;
+        case quit:
+        System.exit(0);
+        break;
+        default:
+        System.out.println("Invalid command");
+        break;
       }
     }
-  } catch(Exception e) {
-    System.out.println("lol:");
+  } catch (Exception e) {
+    System.out.println("Erreur :");
     e.printStackTrace(System.out);
   }
-
 }
 }
