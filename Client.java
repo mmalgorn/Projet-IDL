@@ -86,6 +86,10 @@ public class Client {
           System.out.println("\tmkdir <name> : Create a new directory.");
           System.out.println("\trm <name> : Delete the given file or directory.");
           System.out.println("\tread <name> [size] [offset] : Display the content of the file.");
+          System.out.println("\tvi [option] <name> : Open file editor");
+          System.out.println("\t\tOptions");
+          System.out.println("\t\t\t-wa\tThe text will be add at the end of the file");
+          System.out.println("\t\t\t-wh\tThe file will be clear before adding text");
           System.out.println("\tquit : Close the client.");
           break;
           case ls:
@@ -244,9 +248,13 @@ public class Client {
             }
             if(saisie.length()>0)
             saisie = saisie.substring(0,saisie.length()-1);
-            System.out.println(saisie);
-            curFile.value.write(saisie.length(), saisie);
+            int ret = curFile.value.write(saisie.length(), saisie);
             curFile.value.close();
+            if(saisie.length()!=ret){
+              System.out.println("Error Writing");
+            }else{
+              System.out.println("Writing Sucess");
+            }
           }
           }catch (no_such_file e) {
             System.out.println(args[1] + " no such file");
@@ -254,6 +262,8 @@ public class Client {
             System.out.println("Parameter 2 or 3 is invalid");
 
           }
+        }else {
+          System.out.println("Missing name parameter");
         }
         break;
         case quit:
