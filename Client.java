@@ -216,7 +216,6 @@ public class Client {
               if(args.length >= 3){
                 if(args[1].equals("-wa")){
                   m=mode.write_append;
-                  System.out.println("-Wa");
                 }else{
                   if(args[1].equals("-wh")){
                       m=mode.write_trunc;
@@ -240,10 +239,11 @@ public class Client {
             Scanner sc = new Scanner(System.in);
             String saisie="";
             String buffer="";
-            while (!buffer.equals("quit")){
+            while (!(buffer = sc.nextLine()).equals("quit")){
               saisie=saisie+buffer+"\n";
-              buffer = sc.nextLine();
             }
+            if(saisie.length()>0)
+            saisie = saisie.substring(0,saisie.length()-1);
             System.out.println(saisie);
             curFile.value.write(saisie.length(), saisie);
             curFile.value.close();

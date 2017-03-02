@@ -84,12 +84,9 @@ public class regular_fileImpl extends regular_filePOA {
 			throw new invalid_operation();
 
 		try {
-			if(m==mode.write_append){
-				raf.write(data.getBytes(),offset,size+fileSize);
-			}
-			else{
-				raf.write(data.getBytes(), offset, size);
-			}
+				if(fileSize>0&&m==mode.write_append) data="\n"+data;
+				raf.write(data.getBytes(), 0, size);
+
 		} catch (IOException e) {
 			System.out.println(e);
 			e.printStackTrace();
